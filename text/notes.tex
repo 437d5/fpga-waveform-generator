@@ -1,0 +1,210 @@
+\documentclass[12pt,a4paper,TimesNewRoman]{article}
+\usepackage{graphicx}
+\usepackage[14pt]{extsizes}
+\usepackage{cmap}
+\usepackage[T2A]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english,russian]{babel}
+\usepackage[left=2.5cm,right=1.5cm,top=2cm,bottom=2cm]{geometry}
+\linespread{1.3} %междустрочный интервал 1.5
+%абзацный отступ 1.25??
+%выравнивание по ширине??
+\usepackage{indentfirst}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{mathtools}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{float}
+%\usepackage{caption}
+\usepackage[unicode,pdftex]{hyperref}
+\usepackage{polynom}
+\usepackage{multicol}
+\setcounter{page}{2}
+\usepackage{enumitem}
+\usepackage{listings}
+
+\usepackage[unicode, pdftex]{hyperref}
+\hypersetup{
+    colorlinks=true,    % Включает цветные ссылки вместо рамок
+    linkcolor=black,    % Цвет внутренних ссылок (например, на разделы)
+    urlcolor=black,     % Цвет URL-ссылок
+    citecolor=black,    % Цвет ссылок на литературу
+    pdfborder={0 0 0},  % Убирает рамки вокруг ссылок
+    pdfstartview=FitH,  % Опция для правильного отображения при открытии
+    bookmarksnumbered=true, % Нумерованные закладки в PDF
+    bookmarksopen=true      % Раскрывать закладки по умолчанию
+}
+
+\lstset{
+    language=Verilog,           % Язык - Verilog
+    basicstyle=\ttfamily\small, % Шрифт
+    keywordstyle=\color{blue},  % Цвет ключевых слов
+    commentstyle=\color{black}, % Цвет комментариев
+    numbers=left,               % Нумерация строк слева
+    numberstyle=\color{black},
+    frame=none,               % Рамка вокруг кода
+    breaklines=true,            % Перенос длинных строк
+    tabsize=4,                  % Размер табуляции
+    showstringspaces=false      % Не показывать пробелы в строках
+}
+
+
+\usepackage{caption}
+\DeclareCaptionFormat{custom}{#1#2~--- #3} % Формат: "Рисунок 1 — Текст"
+\captionsetup[figure]{
+    format=custom,
+    name=Рисунок,
+    labelsep=space, % Убирает двоеточие
+}
+
+\title{вкр дневник}
+\author{Uladzislau Kaplan}
+\date{December 2025}
+
+\begin{document}
+% -----СОДЕРЖАНИЕ-----
+%\thispagestyle{empty}
+%\tableofcontents
+%\newpage
+% --------------------
+
+\section{Введение}
+
+\paragraph{План:} \href{run:./plan.pdf}{ссылка на план выполнения}
+
+\paragraph{Тема:} Генератор сигналов специальной формы на основе схем с программируемой логикой.
+
+\paragraph{Цель:} Разработка генератора сигналов специальной формы на основе схем с программируемой логикой.
+
+\paragraph{Задачи:}
+\begin{enumerate}
+    \item Анализ технических характеристик генераторов специальной формы (ГССФ) и уточнение требований к его реализации на основе ПЛИС.
+    \item Анализ системы формирования частот в базисе ПЛИС.
+    \item Разработка кода поведенческого описания ГССФ формы на основе схем с программируемой логикой.
+    \item Моделирование ГССФ инструментами САПР Vivado.
+    \item Тестовые испытания ГССФ на основе отладочной платы с ПЛИС. Демонстрация воспроизведения сигналов произвольной формы.
+\end{enumerate}
+
+\paragraph{Функционал устройства:}
+\begin{enumerate}
+    \item Предустановленные формы сигналов: синусоида, меандр, пилообразный и треугольный.
+    \item Управление основными параметрами: частота, амплитуда, смещение, фаза.
+    \item Функицонал "произвольной формы". Загрузка пользовательской формы из внешнего источника.
+    \item Опционально добавить возможность сгенерировать конечное количество периодов.
+\end{enumerate}
+
+\section{Генерация сигналов}
+
+В устройтсве будет использоваться DDS (Direct Digital Synthesis).
+
+Простейший DDS выглядит так: двоичный счетчик формирует адрес для ПЗУ, куда записана таблица одного периода функции синусоиды, отсчеты с выхода ПЗУ поступают на ЦАП, который формирует на выходе синусоидальный сигнал, подвергающийся фильтрации в ФНЧ и поступающий на выход. 
+
+Для перестройки выходной частоты используется делитель с переменным коэффициентом деления, на вход которого поступает тактовый сигнал с опорного генератора.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\linewidth]{/home/buba/Documents/vkr/text/assets/DDS_synth(1).png}
+    \caption{Архитектура DDS генератора.}
+    \label{fig:dds-arch}
+\end{figure}
+
+Частота, амплитуда и фаза сигнала в любой момент времени точно известны и подконтрольны. Единственным элементом, который обладает свойственной аналоговым схемам нестабильностью, является ЦАП. Высокие технические характеристики стали причиной того, что в последнее время DDS вытесняют обычные аналоговые синтезаторы частот. 
+
+Архитектура DDS в моем устройстве будет следующей:
+
+\(\text{CLK GEN} \Rightarrow \text{Аккумулятор фазы} \Rightarrow \text{ЦАП} \Rightarrow \text{Аналоговый сигнал}\)
+
+\subsection{Аккумулятор фазы}
+
+\begin{lstlisting}
+logic [31:0] phase_acc;
+
+always_ff @(posedge clk) begin
+    phase_acc <= phase_acc + phase_inc;
+end
+\end{lstlisting}
+
+\subsection{Генератор частоты DDS}
+Формула частоты DDS:
+\begin{equation}
+    F_{out} = (phase\_inc * F_{clk}) / 2^N
+\end{equation}
+где \(F_{out}\) -- выходная частота, \(F_{clk}\) -- тактовая частота ПЛИС, \(phase\_inc\) -- слово настройки, \(N\) -- разрядность аккумулятора.
+
+Если тактовая частота ПЛИС 100 МГц, разрядность аккумулятора 32 бит, я хочу синусоиду \(F_{out}=1\)кГц, тогда:
+\[phase\_inc = F_{out} * (2^N) / F_{clk}\]
+\[phase\_inc = 1000 * 4294967296 / 100000000 \approx 42949673 (0x028F5C29 \text{ в hex})\]
+
+Аккумулятор фазы -- это просто счетчик, который на каждом такте увеличивается на \texttt{phase\_inc}
+
+\subsubsection{Режимы работы DDS в ГССФ}
+
+\paragraph{Синусоида} Для генерации синусоиды для отсчетов из таблицы брать старшие биты аккумулятора фазы.
+\[phase\_acc \Rightarrow \text{страшие биты} \Rightarrow sine\_table[addr] \Rightarrow \text{ЦАП}\]
+
+\paragraph{Меандр} Для генерации меандра заданной частоты нужен только аккумулятор фазы, из которого буду брать старший бит.
+\begin{lstlisting}
+square_wave = phase_acc[31]; // 0 or 1
+\end{lstlisting}
+
+Когда \texttt{phase\_acc} переполняется, старший бит меняется \(0-1-0-1\dots\) 
+
+\paragraph{Пилообразный сигнал} Для генерации пилообразного сигнала можно 
+
+взять старшие 12 бит фазы как амплитуду.
+\begin{lstlisting}
+sawtooth = phase_acc[31:20];
+\end{lstlisting}
+Получится \(0,1,2,\dots,4095,0,1,2\dots\) что и будет являться пилой.
+
+\paragraph{Треугольный сигнал} Для его генерации возьмем старший бит аккумулятора фазы как индикатор возрастания или убывания.
+
+\begin{lstlisting}
+if (phase_acc[31] == 0)
+    triangle = phase_acc[30:19]; // increment
+else
+    triangle = ~phase_acc[30:19]; // decrement
+\end{lstlisting}
+
+\paragraph{Произвольная форма} Вместо таблицы \texttt{sine\_table} используется BRAM с пользовательскими данными.
+\begin{lstlisting}
+arb_wave = user_bram[phase_acc[31:22]];
+\end{lstlisting}
+
+\subsection{Проблемы DDS и их решения}
+
+\subsubsection{Ступенчатость на выходе ЦАП}
+Решение: Фильтр низких частот (аналоговый RC/LC фильтр)
+
+\subsubsection{Спектральная чистота}
+Решение: 
+\begin{enumerate}
+    \item Увеличение разрядности таблицы
+    \item Добавление dithering
+    \item Интерполяция между точками таблицы
+\end{enumerate}
+
+\section{Загрузка сигнала произвольной формы}
+
+Можно использовать ESP32 микроконтроллер для загрузки файла с отсчетами через веб-интерфейс.
+
+Связать ESP32 - ПЛИС можно через UART или SPI. SPI будет работать быстрее.
+
+Возможно придется определить протокол обмена:
+\begin{lstlisting}
+    SET_FREQ:<32-bit-phase-word>\n
+    SET_WAVE:SINE\n
+    SET_WAVE:ARB\n
+    LOARD_ARV:<data-size>\n
+\end{lstlisting}
+
+ESP32 будет либо создавать точку доступа WiFi для подключения к нему и хостить сервер в локальной сети, либо будет подключатся к WiFi и хостить сервер там, но я думаю лучше будет просто создавать точку доступа WiFi.
+
+%\newpage
+%\begin{thebibliography}{99}
+%    \bibitem{}
+%\end{thebibliography}
+
+\end{document}

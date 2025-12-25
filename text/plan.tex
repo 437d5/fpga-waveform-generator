@@ -1,0 +1,91 @@
+\documentclass[12pt,a4paper,TimesNewRoman]{article}
+\usepackage{graphicx}
+\usepackage[14pt]{extsizes}
+\usepackage{cmap}
+\usepackage[T2A]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english,russian]{babel}
+\usepackage[left=2.5cm,right=1.5cm,top=2cm,bottom=2cm]{geometry}
+\linespread{1.3} %междустрочный интервал 1.5
+%абзацный отступ 1.25??
+%выравнивание по ширине??
+\usepackage{indentfirst}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{mathtools}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{float}
+%\usepackage{caption}
+\usepackage[unicode,pdftex]{hyperref}
+\usepackage{polynom}
+\usepackage{multicol}
+\setcounter{page}{2}
+\usepackage{enumitem}
+\usepackage{listings}
+
+\usepackage[unicode, pdftex]{hyperref}
+\hypersetup{
+    colorlinks=true,    % Включает цветные ссылки вместо рамок
+    linkcolor=black,    % Цвет внутренних ссылок (например, на разделы)
+    urlcolor=black,     % Цвет URL-ссылок
+    citecolor=black,    % Цвет ссылок на литературу
+    pdfborder={0 0 0},  % Убирает рамки вокруг ссылок
+    pdfstartview=FitH,  % Опция для правильного отображения при открытии
+    bookmarksnumbered=true, % Нумерованные закладки в PDF
+    bookmarksopen=true      % Раскрывать закладки по умолчанию
+}
+
+\lstset{
+    language=Verilog,           % Язык - Verilog
+    basicstyle=\ttfamily\small, % Шрифт
+    keywordstyle=\color{blue},  % Цвет ключевых слов
+    commentstyle=\color{black}, % Цвет комментариев
+    numbers=left,               % Нумерация строк слева
+    numberstyle=\color{black},
+    frame=none,               % Рамка вокруг кода
+    breaklines=true,            % Перенос длинных строк
+    tabsize=4,                  % Размер табуляции
+    showstringspaces=false      % Не показывать пробелы в строках
+}
+
+
+\usepackage{caption}
+\DeclareCaptionFormat{custom}{#1#2~--- #3} % Формат: "Рисунок 1 — Текст"
+\captionsetup[figure]{
+    format=custom,
+    name=Рисунок,
+    labelsep=space, % Убирает двоеточие
+}
+
+\begin{document}
+
+\section{Этап 1. Подготовительный}
+
+\paragraph{Неделя 1.} Изучение предметной области, конспект по DDS, АЦП. Анализ существующих решений. Определение ТЗ устройства.
+\paragraph{Неделя 2.} Подготовка инструментов для разработки.
+
+\section{Этап 2. Проектирование архитектуры}
+
+\paragraph{Неделя 3.} Разработка системной архитектуры (блок-схема системы). Выбор интерфейсов, проектирование протокола связи. Определение форматов данных. Разделение на модули.
+
+\section{Этап 3. Реализация на SystemVerilog}
+
+\paragraph{Неделя 4.} Реализация базовых модулей (\texttt{sine\_lut, phase\_accumulator, dds\_core}).
+\paragraph{Неделя 5.} Память и интерфейсы (\texttt{arb\_wave\_bram, uart\_receiver, protocol\_parser}).
+\paragraph{Неделя 6.} Интеграция и управление. (\texttt{control\_interface, dac\_interface, top}).
+\paragraph{Неделя 7.} Оптимизация и отладка.
+
+\section{Этап 4. Программирование ESP32}
+
+\paragraph{Неделя 8.} Базовый функционал. UART или SPI драйвер. Протокол передачи. Веб-сервер.
+\paragraph{Неделя 9.} Загрузка файла произвольной формы.
+
+\section{Этап 5. Испытания и измерения}
+
+\paragraph{Неделя 10.} Функциональные тесты. Проверка всех форм волн. Диапазон частот. Загрузка произвольной формы.
+\paragraph{Неделя 11.} Параметрические измерения. Нелинейные искажения. Фазовый шум. Точность амплитуды.
+
+
+\end{document}
