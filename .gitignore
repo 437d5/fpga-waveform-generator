@@ -328,3 +328,6 @@ TSWLatexianTemp*
 # folder for literature i used as references
 readings/
 template.tex
+
+*.vcd
+dds_sim
