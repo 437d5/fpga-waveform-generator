@@ -11,6 +11,10 @@ def generate_quarter_sine_table(addr_w=10, data_w=14):
     print(f"  Максимальное значение: {max_val}")
     
     with open("quarter_sine_lut.mem", "w") as f:
+        # Динамическая маска и количество HEX-символов
+        mask = (1 << data_w) - 1
+        hex_chars = (data_w + 3) // 4 # Вычисляем, сколько символов нужно (8 бит = 2, 12 бит = 3, 14 бит = 4)
+
         for i in range(depth):
             if depth > 1:
                 angle = (i / (depth - 1)) * (math.pi / 2)
@@ -18,10 +22,10 @@ def generate_quarter_sine_table(addr_w=10, data_w=14):
                 angle = 0
             
             sine_val = math.sin(angle)
-            
             value = int(round(sine_val * max_val))
             
-            hex_str = f"{value & 0x3FFF:04X}"
+            # Динамическое форматирование
+            hex_str = f"{value & mask:0{hex_chars}X}"
             f.write(f"{hex_str}\n")
     
     print(f"\nФайл 'quarter_sine_lut.mem' создан успешно!")
@@ -29,6 +33,6 @@ def generate_quarter_sine_table(addr_w=10, data_w=14):
 
 if __name__ == "__main__":
     ADDR_W = 10
-    DATA_W = 14
+    DATA_W = 12
     
     generate_quarter_sine_table(ADDR_W, DATA_W)

@@ -330,4 +330,10 @@ readings/
 template.tex
 
 *.vcd
+*.vvp
 dds_sim
+obj_dir
+
+project
+
+dds_output*

@@ -1,3 +1,5 @@
+`timescale 1ns/1ps
+
 module quarter_sine_lut #(
     parameter ADDR_W = 10,  // разрядность адреса LUT (для 1/4 синусоиды)
     parameter DATA_W = 14   // разрядность амплитуды
@@ -10,7 +12,7 @@ module quarter_sine_lut #(
     reg signed [DATA_W-1:0] mem [0:(1<<ADDR_W)-1];
 
     initial begin
-        $readmemh("quarter_sine_lut.mem", mem);
+        $readmemh("design/quarter_sine_lut.mem", mem);
     end
 
     always @(posedge clk) begin
