@@ -4,17 +4,22 @@ module dds_core #(
     parameter int AMP_W = 10,
     parameter int PHASE_W = 32,          //! Phase counter width
     parameter int LUT_W = 10,            //! Sine lut addr width
-    parameter int OUT_W = 14             //! Output signal width
-    //parameter int AMP_W = 8,             // Amplitude control width
-    //parameter int MUL_W = OUT_W + AMP_W, // Multiplier width
+    parameter int OUT_W = 14,             //! Output signal width
+    parameter int AWG_W = 10
 ) (             
     input  logic                clk,
     input  logic                rst, 
     input  logic [PHASE_W-1:0]  phase_step,
-    input  logic [1:0]          wave_sel,
-    input  logic [AMP_W-1:0]    amplitude, // Unsigned: 0 - silence, max - impower 1.0
-    input logic signed [OUT_W-1:0] offset, // constant offset
-    input  logic [PHASE_W-1:0] duty_threshold, // для скважности
+
+    input  logic [2:0]              wave_sel,
+    input  logic [AMP_W-1:0]        amplitude, // Unsigned: 0 - silence, max - impower 1.0
+    input  logic signed [OUT_W-1:0] offset, // constant offset
+    input  logic [PHASE_W-1:0]      duty_threshold, // для скважности
+
+    input logic                    awg_we,
+    input logic [AWG_W-1:0]        awg_addr_w,
+    input logic signed [OUT_W-1:0] awg_data_in,
+
     output logic signed [OUT_W-1:0]    dds_out
 );
 
@@ -85,6 +90,27 @@ module dds_core #(
             sine_val <= quarter_sine_val;
     end
 
+    // AWG 
+    logic [AWG_W-1:0] awg_addr_r;
+    logic signed [OUT_W-1:0] awg_raw;
+    logic signed [OUT_W-1:0] awg_pipe;
+
+    assign awg_addr_r = phase_acc[PHASE_W-1 -: AWG_W];
+
+    dual_port_ram_awg #(
+        .DATA_WIDTH(OUT_W),
+        .ADDR_WIDTH(AWG_W)
+    ) awg_ram_inst (
+        .clk_w   (clk),
+        .we      (awg_we),
+        .addr_w  (awg_addr_w),
+        .data_in (awg_data_in),
+
+        .clk_r   (clk),
+        .addr_r  (awg_addr_r),
+        .data_out(awg_raw)
+    );
+
 
     // OTHER SIGNALS
     localparam signed [OUT_W-1:0] MAX_VAL = (1 << (OUT_W-1)) - 1;
@@ -108,11 +134,13 @@ module dds_core #(
     assign tri_abs = phase_acc[PHASE_W-1] ? ~phase_acc[PHASE_W-2 -: OUT_W] : phase_acc[PHASE_W-2 -: OUT_W];
     assign tri_raw = $signed({1'b0, tri_abs}) - CENTER_VAL;
 
+
+    // PIPELINE ALIGNMENT
     logic signed [OUT_W-1:0] square_pipe [0:1];
     logic signed [OUT_W-1:0] saw_pipe [0:1];
     logic signed [OUT_W-1:0] tri_pipe [0:1];
 
-    logic [1:0] wave_sel_pipe [0:1];
+    logic [2:0] wave_sel_pipe [0:1];
 
     always_ff @(posedge clk) begin
         if (rst) begin
@@ -122,6 +150,7 @@ module dds_core #(
                 tri_pipe[i]      <= '0;
                 wave_sel_pipe[i] <= '0;
             end
+            awg_pipe <= '0;
         end else begin
             square_pipe[0] <= square_raw;
             square_pipe[1] <= square_pipe[0];
@@ -131,6 +160,8 @@ module dds_core #(
 
             tri_pipe[0] <= tri_raw;
             tri_pipe[1] <= tri_pipe[0];
+
+            awg_pipe <= awg_raw;
 
             wave_sel_pipe[0] <= wave_sel;
             wave_sel_pipe[1] <= wave_sel_pipe[0];
@@ -143,10 +174,11 @@ module dds_core #(
 
     always_comb begin
         case (wave_sel_pipe[1])
-            2'b00: wave_raw = sine_val;
-            2'b01: wave_raw = square_pipe[1];
-            2'b10: wave_raw = saw_pipe[1];
-            2'b11: wave_raw = tri_pipe[1];
+            3'b000: wave_raw = sine_val;
+            3'b001: wave_raw = square_pipe[1];
+            3'b010: wave_raw = saw_pipe[1];
+            3'b011: wave_raw = tri_pipe[1];
+            3'b100: wave_raw = awg_pipe;
             default: wave_raw = '0;
         endcase
     end
