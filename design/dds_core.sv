@@ -14,7 +14,7 @@ module dds_core #(
     input  logic [2:0]              wave_sel,
     input  logic [AMP_W-1:0]        amplitude, // Unsigned: 0 - silence, max - impower 1.0
     input  logic signed [OUT_W-1:0] offset, // constant offset
-    input  logic [PHASE_W-1:0]      duty_threshold, // для скважности
+    input  logic [PHASE_W-1:0]      duty_threshold, // duty cycle
 
     input logic                    awg_we,
     input logic [AWG_W-1:0]        awg_addr_w,
@@ -57,7 +57,7 @@ module dds_core #(
                 sign_invert = 1'b1;
             end
             2'b11: begin // 270-360°
-                lut_addr = ~phase_bits; // Зеркально
+                lut_addr = ~phase_bits; // Mirrored
                 sign_invert = 1'b1;
             end
         endcase

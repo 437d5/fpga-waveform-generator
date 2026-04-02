@@ -336,4 +336,7 @@ obj_dir
 
 project
 
-dds_output*
+*.mti
+*.mpf
+*.dbg
+*.csv
