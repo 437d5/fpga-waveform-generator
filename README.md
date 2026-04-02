@@ -25,3 +25,16 @@ The core logic is implemented in **SystemVerilog**.
 ## Getting Started
 1. Clone the repository: `git clone https://github.com/437d5/fpga-waveform-generator.git`
 2. Run simulation: `make sim`
+
+## Demo
+
+![demo](https://github.com/437d5/fpga-waveform-generator/blob/main/text/assets/ezgif-1a3550bb56cce31d.gif?raw=true)
+
+## Roadmap
+
+- Add pmod DA2 output support
+
+- Add control unit to operate this generator
+
+- Add oscilloscope tests
+
