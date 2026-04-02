@@ -2,34 +2,21 @@
 
 module dds_core #(
     parameter int AMP_W = 10,
-    parameter int PHASE_W = 32,          //! Phase counter width
-    parameter int LUT_W = 10,            //! Sine lut addr width
-    parameter int OUT_W = 14,             //! Output signal width
+    parameter int PHASE_W = 32,          
+    parameter int LUT_W = 10,            
+    parameter int OUT_W = 14,             
     parameter int AWG_W = 10
 ) (             
-    input  logic                clk,
-    input  logic                rst, 
-    input  logic [PHASE_W-1:0]  phase_step,
-
-    input  logic [2:0]              wave_sel,
-    input  logic [AMP_W-1:0]        amplitude, // Unsigned: 0 - silence, max - impower 1.0
-    input  logic signed [OUT_W-1:0] offset, // constant offset
-    input  logic [PHASE_W-1:0]      duty_threshold, // duty cycle
-
-    input logic                    awg_we,
-    input logic [AWG_W-1:0]        awg_addr_w,
-    input logic signed [OUT_W-1:0] awg_data_in,
-
-    output logic signed [OUT_W-1:0]    dds_out
+    gen_if.dut bus 
 );
 
     logic [PHASE_W-1:0] phase_acc;
 
-    always_ff @(posedge clk) begin
-        if (rst)
+    always_ff @(posedge bus.clk) begin
+        if (bus.rst)
             phase_acc <= 0;
         else
-            phase_acc <= phase_acc + phase_step;
+            phase_acc <= phase_acc + bus.phase_step;
     end
 
 
@@ -71,19 +58,19 @@ module dds_core #(
         .ADDR_W(LUT_W),
         .DATA_W(OUT_W)
     ) quarter_sine_lut_inst (
-        .clk(clk),
+        .clk(bus.clk),
         .addr(lut_addr),
         .data_out(quarter_sine_val)
     );
     
-    always_ff @( posedge clk ) begin
-        if (rst)
+    always_ff @( posedge bus.clk ) begin
+        if (bus.rst)
             sign_invert_pipe <= 1'b0;
         else
             sign_invert_pipe <= sign_invert;
     end
 
-    always_ff @(posedge clk) begin
+    always_ff @(posedge bus.clk) begin
         if (sign_invert_pipe)
             sine_val <= -quarter_sine_val;
         else
@@ -101,12 +88,12 @@ module dds_core #(
         .DATA_WIDTH(OUT_W),
         .ADDR_WIDTH(AWG_W)
     ) awg_ram_inst (
-        .clk_w   (clk),
-        .we      (awg_we),
-        .addr_w  (awg_addr_w),
-        .data_in (awg_data_in),
+        .clk_w   (bus.clk),
+        .we      (bus.awg_we),
+        .addr_w  (bus.awg_addr_w),
+        .data_in (bus.awg_data_in),
 
-        .clk_r   (clk),
+        .clk_r   (bus.clk),
         .addr_r  (awg_addr_r),
         .data_out(awg_raw)
     );
@@ -122,7 +109,7 @@ module dds_core #(
     logic signed [OUT_W-1:0] tri_raw;
 
     // SQUARE
-    assign square_raw = (phase_acc < duty_threshold) ? MIN_VAL : MAX_VAL;
+    assign square_raw = (phase_acc < bus.duty_threshold) ? MIN_VAL : MAX_VAL;
 
 
     // SAW
@@ -142,8 +129,8 @@ module dds_core #(
 
     logic [2:0] wave_sel_pipe [0:1];
 
-    always_ff @(posedge clk) begin
-        if (rst) begin
+    always_ff @(posedge bus.clk) begin
+        if (bus.rst) begin
             for (int i = 0; i < 2; i++) begin
                 square_pipe[i]   <= '0;
                 saw_pipe[i]      <= '0;
@@ -163,7 +150,7 @@ module dds_core #(
 
             awg_pipe <= awg_raw;
 
-            wave_sel_pipe[0] <= wave_sel;
+            wave_sel_pipe[0] <= bus.wave_sel;
             wave_sel_pipe[1] <= wave_sel_pipe[0];
         end
     end
@@ -204,28 +191,28 @@ module dds_core #(
                           $signed({dsp_s2_offset_pipe[OUT_W-1], dsp_s2_offset_pipe});
     end
 
-    always_ff @( posedge clk ) begin
-        if (rst) begin
+    always_ff @( posedge bus.clk ) begin
+        if (bus.rst) begin
             dsp_s1_wave   <= '0;
             dsp_s1_amp    <= '0;
             dsp_s1_offset <= '0;
             dsp_s2_mul_res <= '0;
             dsp_s2_offset_pipe <= '0;
-            dds_out <= '0;
+            bus.dds_out <= '0;
         end else begin
             dsp_s1_wave <= wave_raw;
-            dsp_s1_amp <= amplitude;
-            dsp_s1_offset <= offset;
+            dsp_s1_amp <= bus.amplitude;
+            dsp_s1_offset <= bus.offset;
 
             dsp_s2_mul_res <= dsp_s1_wave * $signed({1'b0, dsp_s1_amp});
             dsp_s2_offset_pipe <= dsp_s1_offset;
 
             if (dsp_s3_sum_wide > $signed({2'b0, MAX_VAL})) begin
-                dds_out <= MAX_VAL;
+                bus.dds_out <= MAX_VAL;
             end else if (dsp_s3_sum_wide < $signed({2'b11, MIN_VAL[OUT_W-2:0]})) begin
-                dds_out <= MIN_VAL;    
+                bus.dds_out <= MIN_VAL;    
             end else begin
-                dds_out <= dsp_s3_sum_wide[OUT_W-1:0];
+                bus.dds_out <= dsp_s3_sum_wide[OUT_W-1:0];
             end
         end
     end
