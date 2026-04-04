@@ -1,8 +1,8 @@
 `timescale 1ns/1ps
 
 module quarter_sine_lut #(
-    parameter ADDR_W = 10,  // разрядность адреса LUT (для 1/4 синусоиды)
-    parameter DATA_W = 14   // разрядность амплитуды
+    parameter ADDR_W = 10, 
+    parameter DATA_W = 14  
 ) (
     input clk,
     input [ADDR_W-1:0] addr,

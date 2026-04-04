@@ -1,0 +1,106 @@
+m255
+K4
+z2
+13
+!s112 1.1
+!i10d 8192
+!i10e 25
+!i10f 100
+cModel Technology
+Z0 dC:/Users/0/Desktop/fpga-waveform-generator/design
+vdds_core
+Z1 DXx6 sv_std 3 std 0 22 9oUSJO;AeEaW`l:M@^WG92
+Z2 !s110 1775196799
+!i10b 1
+!s100 :KXadkzW@];SbSDc]R6X?2
+IKYBGJ5][FcQjA@A6V6aW>0
+S1
+R0
+Z3 w1775196053
+8dds_core.sv
+Fdds_core.sv
+!i122 0
+L0 3 217
+Z4 VDg1SIo80bB@j0V0VzS_@n1
+Z5 OL;L;2024.1;79
+r1
+!s85 0
+31
+Z6 !s108 1775196799.000000
+!s107 tb_top.sv|dds_tb.sv|gen_if.sv|dds_core.sv|dual_port_ram_awg.sv|quarter_sine_lut.sv|
+Z7 !s90 -reportprogress|300|-sv|quarter_sine_lut.sv|dual_port_ram_awg.sv|dds_core.sv|gen_if.sv|dds_tb.sv|tb_top.sv|
+!i113 0
+Z8 o-sv -L mtiAvm -L mtiRnm -L mtiOvm -L mtiUvm -L mtiUPF -L infact
+Z9 tCvgOpt 0
+vdual_port_ram_awg
+R1
+R2
+!i10b 1
+!s100 k:15iMEOJY_nGzmZZ6R?I1
+I6nP3S5En@_9B]m]E>MhPB3
+S1
+R0
+w1774610724
+8dual_port_ram_awg.sv
+Fdual_port_ram_awg.sv
+!i122 0
+L0 1 25
+R4
+R5
+r1
+!s85 0
+31
+R6
+Z10 !s107 tb_top.sv|dds_tb.sv|gen_if.sv|dds_core.sv|dual_port_ram_awg.sv|quarter_sine_lut.sv|
+R7
+!i113 0
+R8
+R9
+Ygen_if
+R1
+R2
+!i10b 1
+!s100 m=3^c`bi:Q;?:O@1=jnST3
+I9^4gC2DS9_5ZQ;JVf>B]D1
+S1
+R0
+R3
+8gen_if.sv
+Fgen_if.sv
+!i122 0
+L0 1 0
+R4
+R5
+r1
+!s85 0
+31
+R6
+R10
+R7
+!i113 0
+R8
+R9
+vquarter_sine_lut
+R1
+R2
+!i10b 1
+!s100 UU6lABbVf:YDcEk5aXmF;2
+I8;;;jETTLKN5WDUWoj2@F1
+S1
+R0
+w1775196532
+8quarter_sine_lut.sv
+Fquarter_sine_lut.sv
+!i122 0
+L0 3 20
+R4
+R5
+r1
+!s85 0
+31
+R6
+R10
+R7
+!i113 0
+R8
+R9
